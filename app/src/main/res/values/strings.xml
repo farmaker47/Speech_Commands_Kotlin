@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">Speech Commands Kotlin</string>
+    <string name="speech_word_prompt">Say one of the words below!</string>
+    <string name="sample_rate">Sample Rate</string>
+    <string name="_16000_hz">16000 Hz</string>
+    <string name="inference_time">Inference Time</string>
+    <string name="_32ms">32ms</string>
+    <string name="threads">Threads</string>
+    <string name="api">API</string>
+    <string name="tflite">TFLITE</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="up">Up</string>
+    <string name="down">Down</string>
+    <string name="left">Left</string>
+    <string name="right">Right</string>
+    <string name="on">On</string>
+    <string name="off">Off</string>
+    <string name="stop">Stop</string>
+    <string name="go">Go</string>
+    <string name="allPermissionsGranted">All permissions are granted!</string>
+    <string name="permissionsNotGranted">All permissions are mandatory for app to work properly!</string>
 </resources>
