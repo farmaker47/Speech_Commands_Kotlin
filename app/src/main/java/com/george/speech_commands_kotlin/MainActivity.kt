@@ -3,6 +3,7 @@ package com.george.speech_commands_kotlin
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.content.res.AssetManager
 import android.os.Bundle
 import android.util.Log
 import android.widget.LinearLayout
@@ -10,10 +11,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.george.speech_commands_kotlin.databinding.TfeScActivitySpeechBinding
+import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import java.io.BufferedReader
+import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStreamReader
+import java.nio.ByteBuffer
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
@@ -35,7 +41,7 @@ class MainActivity : AppCompatActivity(),
         const val MINIMUM_COUNT = 3
         const val MINIMUM_TIME_BETWEEN_SAMPLES_MS: Long = 30
         const val LABEL_FILENAME = "conv_actions_labels.txt"
-        const val MODEL_FILENAME = "file:///android_asset/conv_actions_frozen.tflite"
+        const val MODEL_FILENAME = "conv_actions_frozen.tflite"
         const val NUM_THREADS = 4
 
         // UI elements.
@@ -61,7 +67,7 @@ class MainActivity : AppCompatActivity(),
     private val gestureLayout: LinearLayout? = null
     //private val sheetBehavior: BottomSheetBehavior<LinearLayout>? = null
 
-    private val tfLite: Interpreter? = null
+    private var tfLite: Interpreter? = null
 
     // Permissions
     var PERMISSION_ALL = 123
@@ -108,7 +114,69 @@ class MainActivity : AppCompatActivity(),
         Log.i("LABELS_LIST", labels.toString())
         Log.i("LABELS_LIST", displayedLabels.toString())
 
+        // Load the model from assets folder
+        val actualModelFilename: String = MODEL_FILENAME
+        try {
+            val tfliteOptions =
+                Interpreter.Options()
+            tfliteOptions.setNumThreads(NUM_THREADS)
+            tfLite = Interpreter(
+                loadModelFile(
+                    assets,
+                    actualModelFilename
+                ), tfliteOptions
+            )
+        } catch (e: java.lang.Exception) {
+            throw RuntimeException(e)
+        }
 
+        // Resize input of model
+        tfLite?.resizeInput(
+            0,
+            intArrayOf(RECORDING_LENGTH, 1)
+        )
+        tfLite?.resizeInput(1, intArrayOf(1))
+
+        // Reads type and shape of input and output tensors, respectively.
+        val imageTensorIndex = 0
+        val imageShape: IntArray =
+            tfLite!!.getInputTensor(imageTensorIndex).shape()
+        Log.i("INPUT_TENSOR_SHAPE", imageShape.contentToString())
+        val imageDataType: DataType =
+            tfLite!!.getInputTensor(imageTensorIndex).dataType()
+        Log.i("IMAGE_TYPE", imageDataType.toString())
+
+        val probabilityTensorIndex = 0
+        val probabilityShape =
+            tfLite!!.getOutputTensor(probabilityTensorIndex).shape()// {1, NUM_CLASSES}
+
+        Log.i("OUTPUT_TENSOR_SHAPE", Arrays.toString(probabilityShape))
+
+        val probabilityDataType: DataType =
+            tfLite!!.getOutputTensor(probabilityTensorIndex).dataType()
+        Log.i("OUTPUT_DATA_TYPE", probabilityDataType.toString())
+
+    }
+
+    /**
+     * Memory-map the model file in Assets.
+     */
+    @Throws(IOException::class)
+    private fun loadModelFile(
+        assets: AssetManager,
+        modelFilename: String
+    ): ByteBuffer {
+        val fileDescriptor = assets.openFd(modelFilename)
+        val inputStream =
+            FileInputStream(fileDescriptor.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fileDescriptor.startOffset
+        val declaredLength = fileDescriptor.declaredLength
+        return fileChannel.map(
+            FileChannel.MapMode.READ_ONLY,
+            startOffset,
+            declaredLength
+        )
     }
 
     private fun initRequestPermissions() {
