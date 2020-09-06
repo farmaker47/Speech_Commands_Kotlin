@@ -6,11 +6,16 @@ import android.content.pm.PackageManager
 import android.content.res.AssetManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.george.speech_commands_kotlin.databinding.TfeScActivitySpeechBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import java.io.BufferedReader
@@ -18,14 +23,14 @@ import java.io.FileInputStream
 import java.io.IOException
 import java.io.InputStreamReader
 import java.nio.ByteBuffer
-import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(),
-    ActivityCompat.OnRequestPermissionsResultCallback {
+    ActivityCompat.OnRequestPermissionsResultCallback,
+    View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     // Constants that control the behavior of the recognition code and model
     // settings. See the audio recognition tutorial for a detailed explanation of
@@ -50,7 +55,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     // Working variables.
-    private lateinit var binding: TfeScActivitySpeechBinding
+    private lateinit var bindingActivitySpeechBinding: TfeScActivitySpeechBinding
     var recordingBuffer = ShortArray(RECORDING_LENGTH)
     var recordingOffset = 0
     var shouldContinue = true
@@ -63,9 +68,8 @@ class MainActivity : AppCompatActivity(),
     private val displayedLabels: ArrayList<String> = ArrayList()
 
     //private val recognizeCommands: RecognizeCommands? = null
-    private val bottomSheetLayout: LinearLayout? = null
-    private val gestureLayout: LinearLayout? = null
-    //private val sheetBehavior: BottomSheetBehavior<LinearLayout>? = null
+    private lateinit var bottomSheet: LinearLayout
+    private var sheetBehavior: BottomSheetBehavior<LinearLayout?>? = null
 
     private var tfLite: Interpreter? = null
 
@@ -78,8 +82,8 @@ class MainActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = TfeScActivitySpeechBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        bindingActivitySpeechBinding = TfeScActivitySpeechBinding.inflate(layoutInflater)
+        setContentView(bindingActivitySpeechBinding.root)
 
         //Check for permissions
         initRequestPermissions()
@@ -155,6 +159,66 @@ class MainActivity : AppCompatActivity(),
         val probabilityDataType: DataType =
             tfLite!!.getOutputTensor(probabilityTensorIndex).dataType()
         Log.i("OUTPUT_DATA_TYPE", probabilityDataType.toString())
+
+
+
+        bindingActivitySpeechBinding.bottomSheetLayout.apiInfoSwitch.setOnCheckedChangeListener(this)
+
+        // BottomSheetBehavior
+        bottomSheet = findViewById(R.id.bottom_sheet_layout)
+        sheetBehavior = BottomSheetBehavior.from<LinearLayout>(bottomSheet)
+
+        val vto = bindingActivitySpeechBinding.bottomSheetLayout.gestureLayout.viewTreeObserver
+        vto.addOnGlobalLayoutListener(
+            object : OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    bindingActivitySpeechBinding.bottomSheetLayout.gestureLayout.viewTreeObserver.removeOnGlobalLayoutListener(
+                        this
+                    )
+                    val height =
+                        bindingActivitySpeechBinding.bottomSheetLayout.gestureLayout.measuredHeight
+                    sheetBehavior?.peekHeight = height
+                }
+            })
+        sheetBehavior?.isHideable = false
+
+        sheetBehavior?.setBottomSheetCallback(
+            object : BottomSheetCallback() {
+                override fun onStateChanged(
+                    bottomSheet: View,
+                    newState: Int
+                ) {
+                    when (newState) {
+                        BottomSheetBehavior.STATE_HIDDEN -> {
+                        }
+                        BottomSheetBehavior.STATE_EXPANDED -> {
+                            bindingActivitySpeechBinding.bottomSheetLayout.bottomSheetArrow
+                                .setImageResource(R.drawable.icn_chevron_down)
+                        }
+                        BottomSheetBehavior.STATE_COLLAPSED -> {
+                            bindingActivitySpeechBinding.bottomSheetLayout.bottomSheetArrow
+                                .setImageResource(R.drawable.icn_chevron_up)
+                        }
+                        BottomSheetBehavior.STATE_DRAGGING -> {
+                        }
+                        BottomSheetBehavior.STATE_SETTLING -> bindingActivitySpeechBinding.bottomSheetLayout.bottomSheetArrow
+                            .setImageResource(
+                                R.drawable.icn_chevron_up
+                            )
+                    }
+                }
+
+                override fun onSlide(
+                    bottomSheet: View,
+                    slideOffset: Float
+                ) {
+                }
+            })
+
+        bindingActivitySpeechBinding.bottomSheetLayout.plus.setOnClickListener(this)
+        bindingActivitySpeechBinding.bottomSheetLayout.minus.setOnClickListener(this)
+
+        bindingActivitySpeechBinding.bottomSheetLayout.sampleRate.text = "$SAMPLE_RATE Hz"
 
     }
 
@@ -237,5 +301,15 @@ class MainActivity : AppCompatActivity(),
 
     private fun allPermissionsGranted(grantResults: IntArray) = grantResults.all {
         it == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onClick(p0: View?) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onCheckedChanged(p0: CompoundButton?, p1: Boolean) {
+        TODO("Not yet implemented")
+        /*backgroundHandler.post(Runnable { tfLite!!.setUseNNAPI(isChecked) })
+        if (isChecked) apiSwitchCompat.setText("NNAPI") else apiSwitchCompat.setText("TFLITE")*/
     }
 }
