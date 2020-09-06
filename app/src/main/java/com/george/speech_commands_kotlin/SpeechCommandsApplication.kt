@@ -2,6 +2,7 @@ package com.george.speech_commands_kotlin
 
 import android.app.Application
 import com.george.speech_commands_kotlin.di.mainViewModelModule
+import com.george.speech_commands_kotlin.di.recognizeCommandsModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -12,7 +13,7 @@ class SpeechCommandsApplication : Application() {
         startKoin {
             //androidContext(applicationContext)
             androidContext(this@SpeechCommandsApplication)
-            modules(mainViewModelModule)
+            modules(mainViewModelModule, recognizeCommandsModule)
         }
     }
 }

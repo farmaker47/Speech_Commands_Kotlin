@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat
 import com.george.speech_commands_kotlin.databinding.TfeScActivitySpeechBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
+import org.koin.android.ext.android.get
 import org.tensorflow.lite.Interpreter
 import java.util.concurrent.locks.ReentrantLock
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity(),
 
     // Koin DI
     private val viewModel: MainActivityViewModel by viewModel()
+    private lateinit var recognizeCommands: RecognizeCommands
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,14 +78,17 @@ class MainActivity : AppCompatActivity(),
         setContentView(bindingActivitySpeechBinding.root)
         bindingActivitySpeechBinding.lifecycleOwner = this
 
+        // Koin DI
+        recognizeCommands = get()
+
         //Check for permissions
         initRequestPermissions()
 
-        // Load Labels
-        viewModel.loadLabelsFromAssetsFolder()
-
         // Load Model
         viewModel.loadModelFromAssetsFolder()
+
+        // Load Labels
+        recognizeCommands.loadLabelsFromAssetsFolder()
 
         bindingActivitySpeechBinding.bottomSheetLayout.apiInfoSwitch.setOnCheckedChangeListener(this)
 

@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import org.koin.core.KoinComponent
+import org.koin.core.get
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import java.io.BufferedReader
@@ -15,7 +17,8 @@ import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.util.*
 
-class MainActivityViewModel(application: Application) : AndroidViewModel(application) {
+class MainActivityViewModel(application: Application) : AndroidViewModel(application),
+    KoinComponent {
 
     private lateinit var tfLite: Interpreter
     private val context: Context = application
@@ -28,15 +31,13 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     fun loadModelFromAssetsFolder() {
         // Load the model from assets folder
-        val actualModelFilename: String = MainActivity.MODEL_FILENAME
         try {
             val tfliteOptions =
                 Interpreter.Options()
             tfliteOptions.setNumThreads(MainActivity.NUM_THREADS)
             tfLite = Interpreter(
                 loadModelFile(
-                    context.assets,
-                    actualModelFilename
+                    context.assets
                 ), tfliteOptions
             )
         } catch (e: java.lang.Exception) {
@@ -70,47 +71,14 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         Log.i("OUTPUT_DATA_TYPE", probabilityDataType.toString())
     }
 
-    fun loadLabelsFromAssetsFolder() {
-        // Load the labels for the model, but only display those that don't start
-        // with an underscore.
-        val actualLabelFilename: String = MainActivity.LABEL_FILENAME
-        val br: BufferedReader
-        try {
-            br = BufferedReader(
-                InputStreamReader(
-                    context.assets.open(actualLabelFilename)
-                )
-            )
-            var line: String
-
-            while (br.readLine().also { line = it } != "o") {
-                labels.add(line)
-                if (line[0] != '_') {
-                    displayedLabels.add(
-                        line.substring(0, 1).toUpperCase(Locale("EN")) + line.substring(1)
-                    )
-                }
-            }
-
-            br.close()
-
-        } catch (e: Exception) {
-            Log.e("READ_LABELS_EXCEPTION", e.toString())
-        }
-
-        Log.i("LABELS_LIST", labels.toString())
-        Log.i("LABELS_LIST", displayedLabels.toString())
-    }
-
     /**
      * Memory-map the model file in Assets.
      */
     @Throws(IOException::class)
     private fun loadModelFile(
-        assets: AssetManager,
-        modelFilename: String
+        assets: AssetManager
     ): ByteBuffer {
-        val fileDescriptor = assets.openFd(modelFilename)
+        val fileDescriptor = assets.openFd(MainActivity.MODEL_FILENAME)
         val inputStream =
             FileInputStream(fileDescriptor.fileDescriptor)
         val fileChannel = inputStream.channel
