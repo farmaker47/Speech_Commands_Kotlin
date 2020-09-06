@@ -22,11 +22,10 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     private lateinit var tfLite: Interpreter
     private val context: Context = application
-    private val labels: ArrayList<String> = ArrayList()
-    private val displayedLabels: ArrayList<String> = ArrayList()
+    private val recognizeCommands: RecognizeCommands = get()
 
     init {
-
+        recognizeCommands.loadLabelsFromAssetsFolder()
     }
 
     fun loadModelFromAssetsFolder() {

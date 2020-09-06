@@ -69,8 +69,6 @@ class MainActivity : AppCompatActivity(),
 
     // Koin DI
     private val viewModel: MainActivityViewModel by viewModel()
-    private lateinit var recognizeCommands: RecognizeCommands
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,17 +76,11 @@ class MainActivity : AppCompatActivity(),
         setContentView(bindingActivitySpeechBinding.root)
         bindingActivitySpeechBinding.lifecycleOwner = this
 
-        // Koin DI
-        recognizeCommands = get()
-
         //Check for permissions
         initRequestPermissions()
 
         // Load Model
         viewModel.loadModelFromAssetsFolder()
-
-        // Load Labels
-        recognizeCommands.loadLabelsFromAssetsFolder()
 
         bindingActivitySpeechBinding.bottomSheetLayout.apiInfoSwitch.setOnCheckedChangeListener(this)
 
@@ -110,7 +102,7 @@ class MainActivity : AppCompatActivity(),
             })
         sheetBehavior?.isHideable = false
 
-        sheetBehavior?.setBottomSheetCallback(
+        sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetCallback() {
                 override fun onStateChanged(
                     bottomSheet: View,
