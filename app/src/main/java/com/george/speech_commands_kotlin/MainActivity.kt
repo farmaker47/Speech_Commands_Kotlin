@@ -3,9 +3,7 @@ package com.george.speech_commands_kotlin
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.AssetManager
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.CompoundButton
@@ -16,17 +14,9 @@ import androidx.core.app.ActivityCompat
 import com.george.speech_commands_kotlin.databinding.TfeScActivitySpeechBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
-import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
-import java.io.BufferedReader
-import java.io.FileInputStream
-import java.io.IOException
-import java.io.InputStreamReader
-import java.nio.ByteBuffer
-import java.nio.channels.FileChannel
-import java.util.*
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.collections.ArrayList
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class MainActivity : AppCompatActivity(),
     ActivityCompat.OnRequestPermissionsResultCallback,
@@ -64,9 +54,6 @@ class MainActivity : AppCompatActivity(),
     private val recognitionThread: Thread? = null
     private val recordingBufferLock = ReentrantLock()
 
-    private val labels: ArrayList<String> = ArrayList()
-    private val displayedLabels: ArrayList<String> = ArrayList()
-
     //private val recognizeCommands: RecognizeCommands? = null
     private lateinit var bottomSheet: LinearLayout
     private var sheetBehavior: BottomSheetBehavior<LinearLayout?>? = null
@@ -79,88 +66,24 @@ class MainActivity : AppCompatActivity(),
         Manifest.permission.RECORD_AUDIO
     )
 
+    // Koin DI
+    private val viewModel: MainActivityViewModel by viewModel()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bindingActivitySpeechBinding = TfeScActivitySpeechBinding.inflate(layoutInflater)
         setContentView(bindingActivitySpeechBinding.root)
+        bindingActivitySpeechBinding.lifecycleOwner = this
 
         //Check for permissions
         initRequestPermissions()
 
-        // Load the labels for the model, but only display those that don't start
-        // with an underscore.
-        val actualLabelFilename: String = LABEL_FILENAME
-        val br: BufferedReader
-        try {
-            br = BufferedReader(
-                InputStreamReader(
-                    assets.open(actualLabelFilename)
-                )
-            )
-            var line: String
+        // Load Labels
+        viewModel.loadLabelsFromAssetsFolder()
 
-            while (br.readLine().also { line = it } != "o") {
-                labels.add(line)
-                if (line[0] != '_') {
-                    displayedLabels.add(
-                        line.substring(0, 1).toUpperCase(Locale("EN")) + line.substring(1)
-                    )
-                }
-            }
-
-            br.close()
-
-        } catch (e: Exception) {
-            Log.e("READ_LABELS_EXCEPTION", e.toString())
-        }
-
-        Log.i("LABELS_LIST", labels.toString())
-        Log.i("LABELS_LIST", displayedLabels.toString())
-
-        // Load the model from assets folder
-        val actualModelFilename: String = MODEL_FILENAME
-        try {
-            val tfliteOptions =
-                Interpreter.Options()
-            tfliteOptions.setNumThreads(NUM_THREADS)
-            tfLite = Interpreter(
-                loadModelFile(
-                    assets,
-                    actualModelFilename
-                ), tfliteOptions
-            )
-        } catch (e: java.lang.Exception) {
-            throw RuntimeException(e)
-        }
-
-        // Resize input of model
-        tfLite?.resizeInput(
-            0,
-            intArrayOf(RECORDING_LENGTH, 1)
-        )
-        tfLite?.resizeInput(1, intArrayOf(1))
-
-        // Reads type and shape of input and output tensors, respectively.
-        val imageTensorIndex = 0
-        val imageShape: IntArray =
-            tfLite!!.getInputTensor(imageTensorIndex).shape()
-        Log.i("INPUT_TENSOR_SHAPE", imageShape.contentToString())
-        val imageDataType: DataType =
-            tfLite!!.getInputTensor(imageTensorIndex).dataType()
-        Log.i("IMAGE_TYPE", imageDataType.toString())
-
-        val probabilityTensorIndex = 0
-        val probabilityShape =
-            tfLite!!.getOutputTensor(probabilityTensorIndex).shape()// {1, NUM_CLASSES}
-
-        Log.i("OUTPUT_TENSOR_SHAPE", Arrays.toString(probabilityShape))
-
-        val probabilityDataType: DataType =
-            tfLite!!.getOutputTensor(probabilityTensorIndex).dataType()
-        Log.i("OUTPUT_DATA_TYPE", probabilityDataType.toString())
-
-
+        // Load Model
+        viewModel.loadModelFromAssetsFolder()
 
         bindingActivitySpeechBinding.bottomSheetLayout.apiInfoSwitch.setOnCheckedChangeListener(this)
 
@@ -220,27 +143,6 @@ class MainActivity : AppCompatActivity(),
 
         bindingActivitySpeechBinding.bottomSheetLayout.sampleRate.text = "$SAMPLE_RATE Hz"
 
-    }
-
-    /**
-     * Memory-map the model file in Assets.
-     */
-    @Throws(IOException::class)
-    private fun loadModelFile(
-        assets: AssetManager,
-        modelFilename: String
-    ): ByteBuffer {
-        val fileDescriptor = assets.openFd(modelFilename)
-        val inputStream =
-            FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
-        return fileChannel.map(
-            FileChannel.MapMode.READ_ONLY,
-            startOffset,
-            declaredLength
-        )
     }
 
     private fun initRequestPermissions() {
