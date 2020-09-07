@@ -4,20 +4,22 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.CompoundButton
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Observer
 import com.george.speech_commands_kotlin.databinding.TfeScActivitySpeechBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
-import org.koin.android.ext.android.get
-import org.tensorflow.lite.Interpreter
-import java.util.concurrent.locks.ReentrantLock
 import org.koin.android.viewmodel.ext.android.viewModel
+import java.util.ArrayList
+import java.util.concurrent.locks.ReentrantLock
 
 class MainActivity : AppCompatActivity(),
     ActivityCompat.OnRequestPermissionsResultCallback,
@@ -42,7 +44,7 @@ class MainActivity : AppCompatActivity(),
 
         // UI elements.
         const val REQUEST_RECORD_AUDIO = 13
-        private val LOG_TAG: String? = MainActivity::class.simpleName
+        val LOG_TAG: String? = MainActivity::class.simpleName
     }
 
     // Working variables.
@@ -59,7 +61,9 @@ class MainActivity : AppCompatActivity(),
     private lateinit var bottomSheet: LinearLayout
     private var sheetBehavior: BottomSheetBehavior<LinearLayout?>? = null
 
-    private var tfLite: Interpreter? = null
+    private val handler = Handler()
+    private var selectedTextView: TextView? = null
+    var labels: ArrayList<String> = ArrayList()
 
     // Permissions
     var PERMISSION_ALL = 123
@@ -139,6 +143,95 @@ class MainActivity : AppCompatActivity(),
         bindingActivitySpeechBinding.bottomSheetLayout.minus.setOnClickListener(this)
 
         bindingActivitySpeechBinding.bottomSheetLayout.sampleRate.text = "$SAMPLE_RATE Hz"
+
+        viewModel.startRecording()
+        viewModel.startRecognition()
+
+        viewModel.labels.observe(
+            this,
+            Observer { labelsCommands ->
+                if (labelsCommands != null) {
+                    labels=labelsCommands
+                }
+            }
+        )
+
+        // Observe viewmodel object
+        viewModel.result.observe(
+            this,
+            Observer { result ->
+                if (result != null) {
+
+                    runOnUiThread(
+                        Runnable {
+
+                            // If we do have a new command, highlight the right list entry.
+                            if (!result.foundCommand.startsWith("_") && result.isNewCommand) {
+                                var labelIndex = -1
+                                for (i in labels.indices) {
+                                    if (labels.get(i) == result.foundCommand) {
+                                        labelIndex = i
+                                    }
+                                }
+                                when (labelIndex - 2) {
+                                    0 -> selectedTextView = bindingActivitySpeechBinding.yes
+                                    1 -> selectedTextView = bindingActivitySpeechBinding.no
+                                    2 -> selectedTextView = bindingActivitySpeechBinding.up
+                                    3 -> selectedTextView = bindingActivitySpeechBinding.down
+                                    4 -> selectedTextView = bindingActivitySpeechBinding.left
+                                    5 -> selectedTextView = bindingActivitySpeechBinding.right
+                                    6 -> selectedTextView = bindingActivitySpeechBinding.on
+                                    7 -> selectedTextView = bindingActivitySpeechBinding.off
+                                    8 -> selectedTextView = bindingActivitySpeechBinding.stop
+                                    9 -> selectedTextView = bindingActivitySpeechBinding.go
+                                }
+                                if (selectedTextView != null) {
+                                    selectedTextView?.setBackgroundResource(R.drawable.round_corner_text_bg_selected)
+                                    val score =
+                                        Math.round(result.score * 100).toString() + "%"
+                                    selectedTextView?.setText(
+                                        selectedTextView?.text.toString() + "\n" + score
+                                    )
+                                    selectedTextView?.setTextColor(
+                                        resources.getColor(android.R.color.holo_orange_light)
+                                    )
+                                    handler.postDelayed(
+                                        Runnable {
+                                            val origionalString: String =
+                                                selectedTextView?.getText().toString()
+                                                    .replace(score, "").trim({ it <= ' ' })
+                                            selectedTextView?.text = origionalString
+                                            selectedTextView?.setBackgroundResource(
+                                                R.drawable.round_corner_text_bg_unselected
+                                            )
+                                            selectedTextView?.setTextColor(
+                                                resources.getColor(android.R.color.darker_gray)
+                                            )
+                                        },
+                                        750
+                                    )
+                                }
+                            }
+                        })
+                    try {
+                        // We don't need to run too frequently, so snooze for a bit.
+                        Thread.sleep(MINIMUM_TIME_BETWEEN_SAMPLES_MS)
+                    } catch (e: InterruptedException) {
+                        // Ignore
+                    }
+
+                }
+            }
+        )
+
+        viewModel.lastProcessingTimeMs.observe(
+            this,
+            Observer { time ->
+                if (time != null) {
+                    bindingActivitySpeechBinding.bottomSheetLayout.inferenceInfo.text = "$time ms"
+                }
+            }
+        )
 
     }
 

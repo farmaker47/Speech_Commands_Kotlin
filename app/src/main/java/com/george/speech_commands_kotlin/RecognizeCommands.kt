@@ -36,7 +36,7 @@ class RecognizeCommands(contxt: Context) {
 
     }
 
-    fun loadLabelsFromAssetsFolder() {
+    fun loadLabelsFromAssetsFolder(): ArrayList<String>{
         // Load the labels for the model, but only display those that don't start
         // with an underscore.
         val actualLabelFilename: String = MainActivity.LABEL_FILENAME
@@ -66,6 +66,8 @@ class RecognizeCommands(contxt: Context) {
 
         Log.i("LABELS_LIST", labels.toString())
         Log.i("LABELS_LIST", displayedLabels.toString())
+
+        return labels
     }
 
     /**
