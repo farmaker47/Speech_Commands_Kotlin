@@ -56,52 +56,64 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     val labels: LiveData<ArrayList<String>>
         get() = _labels
 
+    private val _numThreads = MutableLiveData<Int>()
+    val numThreads: LiveData<Int>
+        get() = _numThreads
+
 
     init {
+        loadModelFromAssetsFolder(1)
         _labels.value = recognizeCommands.loadLabelsFromAssetsFolder()
-        Log.e("NUMBER", labels.value?.size.toString())
     }
 
-    fun loadModelFromAssetsFolder() {
+    fun loadModelFromAssetsFolder(number: Int) {
+
+        // Set number of threads to live data for configuration changes
+        _numThreads.value = number
+
         // Load the model from assets folder
-        try {
-            val tfliteOptions =
-                Interpreter.Options()
-            tfliteOptions.setNumThreads(MainActivity.NUM_THREADS)
-            tfLite = Interpreter(
-                loadModelFile(
-                    context.assets
-                ), tfliteOptions
+        viewModelScope.launch {
+            try {
+                val tfliteOptions =
+                    Interpreter.Options()
+                tfliteOptions.setNumThreads(number)
+                tfLite = Interpreter(
+                    loadModelFile(
+                        context.assets
+                    ), tfliteOptions
+                )
+            } catch (e: java.lang.Exception) {
+                throw RuntimeException(e)
+            }
+
+            // Resize input of model
+            tfLite.resizeInput(
+                0,
+                intArrayOf(MainActivity.RECORDING_LENGTH, 1)
             )
-        } catch (e: java.lang.Exception) {
-            throw RuntimeException(e)
+            tfLite.resizeInput(1, intArrayOf(1))
+
+            // Reads type and shape of input and output tensors, respectively.
+            val imageTensorIndex = 0
+            val imageShape: IntArray =
+                tfLite.getInputTensor(imageTensorIndex).shape()
+            Log.i("INPUT_TENSOR_SHAPE", imageShape.contentToString())
+            val imageDataType: DataType =
+                tfLite.getInputTensor(imageTensorIndex).dataType()
+            Log.i("IMAGE_TYPE", imageDataType.toString())
+
+            val probabilityTensorIndex = 0
+            val probabilityShape =
+                tfLite.getOutputTensor(probabilityTensorIndex).shape()// {1, NUM_CLASSES}
+
+            Log.i("OUTPUT_TENSOR_SHAPE", Arrays.toString(probabilityShape))
+
+            val probabilityDataType: DataType =
+                tfLite.getOutputTensor(probabilityTensorIndex).dataType()
+            Log.i("OUTPUT_DATA_TYPE", probabilityDataType.toString())
+
         }
 
-        // Resize input of model
-        tfLite.resizeInput(
-            0,
-            intArrayOf(MainActivity.RECORDING_LENGTH, 1)
-        )
-        tfLite.resizeInput(1, intArrayOf(1))
-
-        // Reads type and shape of input and output tensors, respectively.
-        val imageTensorIndex = 0
-        val imageShape: IntArray =
-            tfLite.getInputTensor(imageTensorIndex).shape()
-        Log.i("INPUT_TENSOR_SHAPE", imageShape.contentToString())
-        val imageDataType: DataType =
-            tfLite.getInputTensor(imageTensorIndex).dataType()
-        Log.i("IMAGE_TYPE", imageDataType.toString())
-
-        val probabilityTensorIndex = 0
-        val probabilityShape =
-            tfLite.getOutputTensor(probabilityTensorIndex).shape()// {1, NUM_CLASSES}
-
-        Log.i("OUTPUT_TENSOR_SHAPE", Arrays.toString(probabilityShape))
-
-        val probabilityDataType: DataType =
-            tfLite.getOutputTensor(probabilityTensorIndex).dataType()
-        Log.i("OUTPUT_DATA_TYPE", probabilityDataType.toString())
     }
 
     /**
@@ -129,10 +141,9 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             record()
         }
-
     }
 
-    fun stopRecording(){
+    fun stopRecording() {
         shouldContinue = false
     }
 
@@ -217,7 +228,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun stopRecognition(){
+    fun stopRecognition() {
         shouldContinueRecognition = false
     }
 
@@ -295,6 +306,6 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     override fun onCleared() {
         super.onCleared()
-
+        tfLite.close()
     }
 }

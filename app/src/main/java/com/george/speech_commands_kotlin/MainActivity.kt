@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.CompoundButton
@@ -18,7 +19,7 @@ import com.george.speech_commands_kotlin.databinding.TfeScActivitySpeechBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import org.koin.android.viewmodel.ext.android.viewModel
-import java.util.ArrayList
+import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
 class MainActivity : AppCompatActivity(),
@@ -40,27 +41,15 @@ class MainActivity : AppCompatActivity(),
         const val MINIMUM_TIME_BETWEEN_SAMPLES_MS: Long = 30
         const val LABEL_FILENAME = "conv_actions_labels.txt"
         const val MODEL_FILENAME = "conv_actions_frozen.tflite"
-        const val NUM_THREADS = 4
 
         // UI elements.
-        const val REQUEST_RECORD_AUDIO = 13
         val LOG_TAG: String? = MainActivity::class.simpleName
     }
 
     // Working variables.
     private lateinit var bindingActivitySpeechBinding: TfeScActivitySpeechBinding
-    var recordingBuffer = ShortArray(RECORDING_LENGTH)
-    var recordingOffset = 0
-    var shouldContinue = true
-    private val recordingThread: Thread? = null
-    var shouldContinueRecognition = true
-    private val recognitionThread: Thread? = null
-    private val recordingBufferLock = ReentrantLock()
-
-    //private val recognizeCommands: RecognizeCommands? = null
     private lateinit var bottomSheet: LinearLayout
     private var sheetBehavior: BottomSheetBehavior<LinearLayout?>? = null
-
     private val handler = Handler()
     private var selectedTextView: TextView? = null
     var labels: ArrayList<String> = ArrayList()
@@ -83,8 +72,15 @@ class MainActivity : AppCompatActivity(),
         //Check for permissions
         initRequestPermissions()
 
-        // Load Model
-        viewModel.loadModelFromAssetsFolder()
+        // Observe number of threads
+        viewModel.numThreads.observe(
+            this,
+            Observer { number ->
+                if (number != null) {
+                    bindingActivitySpeechBinding.bottomSheetLayout.threads.text = number.toString()
+                }
+            }
+        )
 
         bindingActivitySpeechBinding.bottomSheetLayout.apiInfoSwitch.setOnCheckedChangeListener(this)
 
@@ -232,8 +228,6 @@ class MainActivity : AppCompatActivity(),
 
     }
 
-
-
     private fun initRequestPermissions() {
         if (!hasPermissions(this, *PERMISSIONS)) {
             requestPermissions(PERMISSIONS, PERMISSION_ALL)
@@ -306,12 +300,34 @@ class MainActivity : AppCompatActivity(),
         it == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun onClick(p0: View?) {
-        TODO("Not yet implemented")
+    override fun onClick(v: View?) {
+        if (v?.id == R.id.plus) {
+            val threads: String = bindingActivitySpeechBinding.bottomSheetLayout.threads.text.toString().trim { it <= ' ' }
+            var numThreads = threads.toInt()
+            numThreads++
+            bindingActivitySpeechBinding.bottomSheetLayout.threads.text = numThreads.toString()
+
+            // Procedure when plus button is pressed
+            threadButtonProcedure(numThreads)
+        } else if (v?.id == R.id.minus) {
+            val threads: String = bindingActivitySpeechBinding.bottomSheetLayout.threads.text.toString().trim { it <= ' ' }
+            var numThreads = threads.toInt()
+            if (numThreads == 1) {
+                return
+            }
+            numThreads--
+            bindingActivitySpeechBinding.bottomSheetLayout.threads.text = numThreads.toString()
+
+            //Procedure when minus button is pressed
+            threadButtonProcedure(numThreads)
+        }
+    }
+
+    private fun threadButtonProcedure(numThreads: Int) {
+        viewModel.loadModelFromAssetsFolder(numThreads)
     }
 
     override fun onCheckedChanged(p0: CompoundButton?, p1: Boolean) {
-        TODO("Not yet implemented")
         /*backgroundHandler.post(Runnable { tfLite!!.setUseNNAPI(isChecked) })
         if (isChecked) apiSwitchCompat.setText("NNAPI") else apiSwitchCompat.setText("TFLITE")*/
     }
