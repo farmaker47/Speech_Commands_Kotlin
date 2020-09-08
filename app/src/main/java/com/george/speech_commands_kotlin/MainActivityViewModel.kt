@@ -20,6 +20,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.nnapi.NnApiDelegate
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -43,6 +44,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     var shouldContinue = true
     var shouldContinueRecognition = true
     private val recordingBufferLock = ReentrantLock()
+    //private lateinit var nnApiDelegate: NnApiDelegate
 
     private val _lastProcessingTimeMs = MutableLiveData<Long>()
     val lastProcessingTimeMs: LiveData<Long>
@@ -72,11 +74,15 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         _numThreads.value = number
 
         // Load the model from assets folder
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO) {
             try {
                 val tfliteOptions =
                     Interpreter.Options()
                 tfliteOptions.setNumThreads(number)
+
+                //nnApiDelegate = NnApiDelegate()
+                //tfliteOptions.addDelegate(nnApiDelegate)
+
                 tfLite = Interpreter(
                     loadModelFile(
                         context.assets

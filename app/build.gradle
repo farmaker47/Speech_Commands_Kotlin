@@ -73,6 +73,7 @@ dependencies {
 
     // TF-Lite
     implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    //implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
 
     // Koin for Kotlin
     implementation "org.koin:koin-core:$koin_version"
