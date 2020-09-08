@@ -276,8 +276,8 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
             // Use the smoother to figure out if we've had a real recognition event.
             val currentTime = System.currentTimeMillis()
-            Log.e("INPUT_BUFFER", outputScores[0].contentToString())
-            //_result.postValue(recognizeCommands.processLatestResults(outputScores[0], currentTime))
+            Log.i("INPUT_BUFFER", outputScores[0].contentToString())
+            _result.postValue(recognizeCommands.processLatestResults(outputScores[0], currentTime))
             _lastProcessingTimeMs.postValue(Date().time - startTime)
 
         }

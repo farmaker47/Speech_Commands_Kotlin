@@ -26,7 +26,6 @@ class RecognizeCommands(contxt: Context) {
         ArrayDeque()
     private val SILENCE_LABEL = "_silence_"
     private var previousTopLabel: String = SILENCE_LABEL
-    private val labelsCount = labels.size
     private var previousTopLabelTime: Long = Long.MIN_VALUE
     private var previousTopLabelScore = 0f
 
@@ -36,7 +35,7 @@ class RecognizeCommands(contxt: Context) {
 
     }
 
-    fun loadLabelsFromAssetsFolder(): ArrayList<String>{
+    fun loadLabelsFromAssetsFolder(): ArrayList<String> {
         // Load the labels for the model, but only display those that don't start
         // with an underscore.
         val actualLabelFilename: String = MainActivity.LABEL_FILENAME
@@ -97,14 +96,16 @@ class RecognizeCommands(contxt: Context) {
         currentResults: FloatArray,
         currentTimeMS: Long
     ): RecognitionResult? {
-        if (currentResults.size != labelsCount) {
+
+        if (currentResults.size != labels.size) {
             throw RuntimeException(
                 "The results for recognition should contain "
-                        + labelsCount
+                        + labels.size
                         + " elements, but there are "
                         + currentResults.size
             )
         }
+
         if (!previousResults.isEmpty() && currentTimeMS < previousResults.first.first) {
             throw RuntimeException(
                 "You must feed results in increasing time order, but received a timestamp of "
@@ -153,7 +154,7 @@ class RecognizeCommands(contxt: Context) {
         }
 
         // Calculate the average score across all the results in the window.
-        val averageScores = FloatArray(labelsCount)
+        val averageScores = FloatArray(labels.size)
         for (previousResult in previousResults) {
             val scoresTensor = previousResult.second
             var i = 0
@@ -165,8 +166,8 @@ class RecognizeCommands(contxt: Context) {
 
         // Sort the averaged results in descending score order.
         val sortedAverageScores =
-            arrayOfNulls<ScoreForSorting1>(labelsCount)
-        for (i in 0 until labelsCount) {
+            arrayOfNulls<ScoreForSorting1>(labels.size)
+        for (i in 0 until labels.size) {
             sortedAverageScores[i] = ScoreForSorting1(averageScores[i], i)
         }
         Arrays.sort(sortedAverageScores)
