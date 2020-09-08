@@ -23,8 +23,7 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#00000000">
+        android:layout_height="match_parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -78,6 +77,7 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
+                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
                         android:text="@string/yes" />
@@ -85,6 +85,7 @@
                     <TextView
                         android:id="@+id/no"
                         android:layout_width="0dp"
+                        android:textColor="#000"
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
@@ -107,6 +108,7 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
+                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
                         android:text="@string/up" />
@@ -117,6 +119,7 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
+                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
                         android:text="@string/down" />
@@ -135,6 +138,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
+                        android:textColor="#000"
                         android:layout_weight=".5"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
@@ -146,6 +150,7 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
+                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
                         android:text="@string/right" />
@@ -165,6 +170,7 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
+                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
                         android:text="@string/on" />
@@ -175,6 +181,7 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
+                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
                         android:text="@string/off" />
@@ -194,6 +201,7 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
+                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
                         android:text="@string/stop" />
@@ -203,6 +211,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
+                        android:textColor="#000"
                         android:layout_weight=".5"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"

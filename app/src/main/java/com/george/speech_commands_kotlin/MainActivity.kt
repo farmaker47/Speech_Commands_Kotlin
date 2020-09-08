@@ -198,7 +198,7 @@ class MainActivity : AppCompatActivity(),
                                                 R.drawable.round_corner_text_bg_unselected
                                             )
                                             selectedTextView?.setTextColor(
-                                                resources.getColor(android.R.color.darker_gray)
+                                                resources.getColor(android.R.color.black)
                                             )
                                         },
                                         750
