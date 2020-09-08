@@ -132,11 +132,14 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     }
 
+    fun stopRecording(){
+        shouldContinue = false
+    }
+
     suspend fun record() = withContext(Dispatchers.Default) {
         // Heavy work
+        shouldContinue = true
         Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO)
-
-        // Estimate the buffer size we'll need for this device.
 
         // Estimate the buffer size we'll need for this device.
         var bufferSize = AudioRecord.getMinBufferSize(
@@ -170,8 +173,6 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             LOG_TAG,
             "Start recording"
         )
-
-        // Loop, gathering audio data and copying it to a round-robin buffer.
 
         // Loop, gathering audio data and copying it to a round-robin buffer.
         while (shouldContinue) {
@@ -216,7 +217,12 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun stopRecognition(){
+        shouldContinueRecognition = false
+    }
+
     private suspend fun recognize() = withContext(Dispatchers.Default) {
+        shouldContinueRecognition = true
         // Heavy work
         Log.v(
             LOG_TAG,
@@ -279,12 +285,16 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             Log.i("INPUT_BUFFER", outputScores[0].contentToString())
             _result.postValue(recognizeCommands.processLatestResults(outputScores[0], currentTime))
             _lastProcessingTimeMs.postValue(Date().time - startTime)
-
         }
 
         Log.v(
             LOG_TAG,
             "End recognition"
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+
     }
 }

@@ -144,9 +144,6 @@ class MainActivity : AppCompatActivity(),
 
         bindingActivitySpeechBinding.bottomSheetLayout.sampleRate.text = "$SAMPLE_RATE Hz"
 
-        viewModel.startRecording()
-        viewModel.startRecognition()
-
         viewModel.labels.observe(
             this,
             Observer { labelsCommands ->
@@ -235,6 +232,8 @@ class MainActivity : AppCompatActivity(),
 
     }
 
+
+
     private fun initRequestPermissions() {
         if (!hasPermissions(this, *PERMISSIONS)) {
             requestPermissions(PERMISSIONS, PERMISSION_ALL)
@@ -257,6 +256,18 @@ class MainActivity : AppCompatActivity(),
             }
         }
         return true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.startRecording()
+        viewModel.startRecognition()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.stopRecording()
+        viewModel.stopRecognition()
     }
 
     override fun onRequestPermissionsResult(
