@@ -1,4 +1,4 @@
-package com.george.speech_commands_kotlin
+package com.george.speech
 
 import org.junit.Test
 

@@ -1,6 +1,6 @@
-package com.george.speech_commands_kotlin.di
+package com.george.speech.di
 
-import com.george.speech_commands_kotlin.MainActivityViewModel
+import com.george.speech.MainActivityViewModel
 import org.koin.android.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 

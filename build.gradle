@@ -6,7 +6,7 @@ buildscript {
         // library defined in the app Gradle file
 
         koin_version = "2.1.5"
-        kotlin_version = "1.3.72"
+        kotlin_version = "1.5.10"
         version_kotlin_coroutines = "1.3.7"
         lifecycle_version_viewmodelscope = "2.3.0-alpha07"
         //version_moshi = "1.8.0"

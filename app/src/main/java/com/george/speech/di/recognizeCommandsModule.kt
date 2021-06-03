@@ -1,6 +1,6 @@
-package com.george.speech_commands_kotlin.di
+package com.george.speech.di
 
-import com.george.speech_commands_kotlin.RecognizeCommands
+import com.george.speech.RecognizeCommands
 import org.koin.dsl.module
 
 val recognizeCommandsModule = module {

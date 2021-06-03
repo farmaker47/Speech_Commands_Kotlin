@@ -1,4 +1,4 @@
-package com.george.speech_commands_kotlin
+package com.george.speech
 
 import android.Manifest
 import android.content.Context
@@ -15,12 +15,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.Observer
-import com.george.speech_commands_kotlin.databinding.TfeScActivitySpeechBinding
+import com.george.speech.databinding.TfeScActivitySpeechBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.*
-import java.util.concurrent.locks.ReentrantLock
 
 class MainActivity : AppCompatActivity(),
     ActivityCompat.OnRequestPermissionsResultCallback,
@@ -44,6 +43,11 @@ class MainActivity : AppCompatActivity(),
 
         // UI elements.
         val LOG_TAG: String? = MainActivity::class.simpleName
+    }
+
+    // Load native library
+    init {
+        System.loadLibrary("native-lib")
     }
 
     // Working variables.
@@ -226,6 +230,8 @@ class MainActivity : AppCompatActivity(),
             }
         )
 
+        Log.i("ENCRYPT_KEY", getAPIKey())
+
     }
 
     private fun initRequestPermissions() {
@@ -332,3 +338,5 @@ class MainActivity : AppCompatActivity(),
         if (isChecked) apiSwitchCompat.setText("NNAPI") else apiSwitchCompat.setText("TFLITE")*/
     }
 }
+
+external fun getAPIKey(): String

@@ -18,7 +18,6 @@
 
     <data>
 
-
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -77,21 +76,21 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
-                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/yes" />
+                        android:text="@string/yes"
+                        android:textColor="#000" />
 
                     <TextView
                         android:id="@+id/no"
                         android:layout_width="0dp"
-                        android:textColor="#000"
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/no" />
+                        android:text="@string/no"
+                        android:textColor="#000" />
 
                 </LinearLayout>
 
@@ -108,10 +107,10 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
-                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/up" />
+                        android:text="@string/up"
+                        android:textColor="#000" />
 
                     <TextView
                         android:id="@+id/down"
@@ -119,10 +118,10 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
-                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/down" />
+                        android:text="@string/down"
+                        android:textColor="#000" />
 
                 </LinearLayout>
 
@@ -138,11 +137,11 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
-                        android:textColor="#000"
                         android:layout_weight=".5"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/left" />
+                        android:text="@string/left"
+                        android:textColor="#000" />
 
                     <TextView
                         android:id="@+id/right"
@@ -150,10 +149,10 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
-                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/right" />
+                        android:text="@string/right"
+                        android:textColor="#000" />
 
                 </LinearLayout>
 
@@ -170,10 +169,10 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
-                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/on" />
+                        android:text="@string/on"
+                        android:textColor="#000" />
 
                     <TextView
                         android:id="@+id/off"
@@ -181,10 +180,10 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
-                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/off" />
+                        android:text="@string/off"
+                        android:textColor="#000" />
 
                 </LinearLayout>
 
@@ -201,21 +200,21 @@
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
                         android:layout_weight=".5"
-                        android:textColor="#000"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/stop" />
+                        android:text="@string/stop"
+                        android:textColor="#000" />
 
                     <TextView
                         android:id="@+id/go"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_margin="10dp"
-                        android:textColor="#000"
                         android:layout_weight=".5"
                         android:background="@drawable/round_corner_text_bg_unselected"
                         android:gravity="center"
-                        android:text="@string/go" />
+                        android:text="@string/go"
+                        android:textColor="#000" />
 
                 </LinearLayout>
 

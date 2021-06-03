@@ -1,4 +1,4 @@
-package com.george.speech_commands_kotlin
+package com.george.speech
 
 import android.app.Application
 import android.content.Context
@@ -12,15 +12,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.george.speech_commands_kotlin.MainActivity.Companion.LOG_TAG
-import com.george.speech_commands_kotlin.MainActivity.Companion.RECORDING_LENGTH
-import com.george.speech_commands_kotlin.MainActivity.Companion.SAMPLE_RATE
+import com.george.speech.MainActivity.Companion.LOG_TAG
+import com.george.speech.MainActivity.Companion.RECORDING_LENGTH
+import com.george.speech.MainActivity.Companion.SAMPLE_RATE
 import kotlinx.coroutines.*
 import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.nnapi.NnApiDelegate
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer

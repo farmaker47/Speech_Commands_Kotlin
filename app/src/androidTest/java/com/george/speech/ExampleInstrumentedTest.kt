@@ -1,4 +1,4 @@
-package com.george.speech_commands_kotlin
+package com.george.speech
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
