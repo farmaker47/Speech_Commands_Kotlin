@@ -15,17 +15,26 @@ import androidx.lifecycle.viewModelScope
 import com.george.speech.MainActivity.Companion.LOG_TAG
 import com.george.speech.MainActivity.Companion.RECORDING_LENGTH
 import com.george.speech.MainActivity.Companion.SAMPLE_RATE
+import com.google.common.io.ByteStreams
 import kotlinx.coroutines.*
 import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
+import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import java.nio.channels.FileChannel
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
+import javax.crypto.Cipher
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
+
 
 class MainActivityViewModel(application: Application) : AndroidViewModel(application),
     KoinComponent {
@@ -33,8 +42,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     private lateinit var tfLite: Interpreter
     private val context: Context = application
     private val recognizeCommands: RecognizeCommands = get()
-    private val viewModelJob = Job()
-    private val viewModelScopeJob = CoroutineScope(Dispatchers.Default + viewModelJob)
+    private val FILENAME_FORMAT = "yyyy-MM-dd-HH-mm-ss-SSS"
 
     // Working variables.
     var recordingBuffer =
@@ -65,6 +73,61 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     init {
         loadModelFromAssetsFolder(1)
         _labels.value = recognizeCommands.loadLabelsFromAssetsFolder()
+
+        // Test of loading and encrypting the tflite file
+        loadTfliteToByteArray()
+
+    }
+
+    // This function helps encrypt and save the TFLite file to output directory
+    // e.g com.george.speech_commands_kotlin/Speech Commands Kotlin/.._dummy_text_file.txt
+    // https://developer.android.com/reference/javax/crypto/Cipher
+    // https://developer.android.com/guide/topics/security/cryptography#encrypt-message
+    private fun loadTfliteToByteArray() {
+        val inputStream = context.assets.open(MainActivity.MODEL_FILENAME)
+        val byteArray: ByteArray = ByteStreams.toByteArray(inputStream)
+
+        /*// String to SecretKey
+        // decode the base64 encoded string
+        val decodedKey: ByteArray = Base64.getDecoder().decode(getAPIKey())
+        // rebuild key using SecretKeySpec
+        val originalKey: SecretKey = SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
+
+        // Encrypt the bytearray
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+        cipher.init(Cipher.ENCRYPT_MODE, originalKey)
+        val cipherByteArray: ByteArray = cipher.doFinal(byteArray)*/
+
+        // Generate the File
+        val file = File(
+            getOutputDirectory(context),
+            SimpleDateFormat(
+                FILENAME_FORMAT, Locale.US
+            ).format(1) + "_dummy_text_file.txt"
+        )
+
+        // Write to FileOutputStream
+        try {
+            if (!file.exists()) {
+                file.createNewFile()
+            }
+            val fos = FileOutputStream(file, false)
+            fos.write(byteArray)
+            fos.close()
+        } catch (e: Exception) {
+            Log.e("Error_of_byte_array", e.message)
+        }
+
+
+    }
+
+    private fun getOutputDirectory(context: Context): File {
+        val appContext = context.applicationContext
+        val mediaDir = context.externalMediaDirs.firstOrNull()?.let {
+            File(it, appContext.resources.getString(R.string.app_name)).apply { mkdirs() }
+        }
+        return if (mediaDir != null && mediaDir.exists())
+            mediaDir else appContext.filesDir
     }
 
     fun loadModelFromAssetsFolder(number: Int) {
@@ -73,7 +136,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         _numThreads.value = number
 
         // Load the model from assets folder
-        viewModelScope.launch (Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val tfliteOptions =
                     Interpreter.Options()
@@ -82,11 +145,12 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
                 //nnApiDelegate = NnApiDelegate()
                 //tfliteOptions.addDelegate(nnApiDelegate)
 
-                tfLite = Interpreter(
-                    loadModelFile(
-                        context.assets
-                    ), tfliteOptions
-                )
+                tfLite = Interpreter(loadByteBufferFromTextFile(), tfliteOptions)
+                // tfLite = Interpreter(
+                //                    loadModelFile(
+                //                        context.assets
+                //                    ), tfliteOptions
+                //                )
             } catch (e: java.lang.Exception) {
                 throw RuntimeException(e)
             }
@@ -139,6 +203,17 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             startOffset,
             declaredLength
         )
+    }
+
+    private fun loadByteBufferFromTextFile(
+    ): ByteBuffer {
+        val fileInputStream = context.assets.open("dummy_text_file.txt")
+        val byteArray: ByteArray = ByteStreams.toByteArray(fileInputStream)
+        val byteBuffer = ByteBuffer.allocateDirect(byteArray.size)
+        byteBuffer.order(ByteOrder.nativeOrder())
+        byteBuffer.rewind()
+        byteBuffer.put(byteArray)
+        return byteBuffer
     }
 
     // Start recording
@@ -314,3 +389,5 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         tfLite.close()
     }
 }
+
+//external fun getAPIKey(): String
