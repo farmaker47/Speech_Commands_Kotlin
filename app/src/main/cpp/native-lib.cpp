@@ -2,7 +2,7 @@
 #include <string>
 
 
-//AES allows 128, 192 and 256 bit of key length. In other words 16, 24 or 32 byte
+//AES allows 128, 192 and 256 bit of key length. In other words 16, 24 or 32 length
 //Generate keys: http://www.unit-conversion.info/texttools/random-string-generator/
 extern "C"
 JNIEXPORT jstring JNICALL
