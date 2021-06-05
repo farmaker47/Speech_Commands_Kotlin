@@ -230,8 +230,6 @@ class MainActivity : AppCompatActivity(),
             }
         )
 
-        Log.i("ENCRYPT_KEY", getAPIKey())
-
     }
 
     private fun initRequestPermissions() {
@@ -340,3 +338,4 @@ class MainActivity : AppCompatActivity(),
 }
 
 external fun getAPIKey(): String
+external fun getIVKey(): String

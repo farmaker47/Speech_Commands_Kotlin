@@ -28,11 +28,14 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
+import java.security.spec.AlgorithmParameterSpec
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 
@@ -75,7 +78,48 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         _labels.value = recognizeCommands.loadLabelsFromAssetsFolder()
 
         // Test of loading and encrypting the tflite file
-        loadTfliteToByteArray()
+        //loadTfliteToByteArray()
+        loadTfliteToEncryptedByteArray()
+
+    }
+
+    private fun loadTfliteToEncryptedByteArray() {
+        val inputStream = context.assets.open(MainActivity.MODEL_FILENAME)
+        val byteArray: ByteArray = ByteStreams.toByteArray(inputStream)
+
+        // String to ByteArray
+        val decodedKey: ByteArray = getAPIKey().toByteArray(Charsets.UTF_8)
+        // rebuild key using SecretKeySpec
+        val originalKey: SecretKey = SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
+        // IV Key to ByteArray
+        val ivByteArray = getIVKey().toByteArray()
+        val ivSpec: AlgorithmParameterSpec = IvParameterSpec(ivByteArray)
+        // Encrypt the bytearray
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+        cipher.init(Cipher.ENCRYPT_MODE, originalKey, ivSpec)
+        // Encrypted ByteArray
+        val cipherByteArray: ByteArray = cipher.doFinal(byteArray)
+
+        // Generate the File
+        val file = File(
+            getOutputDirectory(context),
+            SimpleDateFormat(
+                FILENAME_FORMAT, Locale.US
+            ).format(1) + "_encrypted_text_file.txt"
+        )
+
+        // Write to FileOutputStream
+        try {
+            if (!file.exists()) {
+                file.createNewFile()
+            }
+            val fos = FileOutputStream(file, false)
+            fos.write(cipherByteArray)
+            fos.close()
+        } catch (e: Exception) {
+            Log.e("Error_of_byte_array", e.message)
+        }
+
 
     }
 
