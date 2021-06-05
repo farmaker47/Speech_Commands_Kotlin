@@ -33,7 +33,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -77,12 +76,15 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         loadModelFromAssetsFolder(1)
         _labels.value = recognizeCommands.loadLabelsFromAssetsFolder()
 
-        // Test of loading and encrypting the tflite file
-        //loadTfliteToByteArray()
+        // loadTfliteToByteArray()
         loadTfliteToEncryptedByteArray()
 
     }
 
+    // This function helps encrypt and save the TFLite file to output directory
+    // e.g com.george.speech_commands_kotlin/Speech Commands Kotlin/.._dummy_text_file.tflite
+    // https://developer.android.com/reference/javax/crypto/Cipher
+    // https://developer.android.com/guide/topics/security/cryptography#encrypt-message
     private fun loadTfliteToEncryptedByteArray() {
         val inputStream = context.assets.open(MainActivity.MODEL_FILENAME)
         val byteArray: ByteArray = ByteStreams.toByteArray(inputStream)
@@ -105,7 +107,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             getOutputDirectory(context),
             SimpleDateFormat(
                 FILENAME_FORMAT, Locale.US
-            ).format(1) + "_encrypted_text_file.txt"
+            ).format(1) + "_encrypted_file.tflite"
         )
 
         // Write to FileOutputStream
@@ -123,31 +125,16 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
     }
 
-    // This function helps encrypt and save the TFLite file to output directory
-    // e.g com.george.speech_commands_kotlin/Speech Commands Kotlin/.._dummy_text_file.txt
-    // https://developer.android.com/reference/javax/crypto/Cipher
-    // https://developer.android.com/guide/topics/security/cryptography#encrypt-message
     private fun loadTfliteToByteArray() {
         val inputStream = context.assets.open(MainActivity.MODEL_FILENAME)
         val byteArray: ByteArray = ByteStreams.toByteArray(inputStream)
-
-        /*// String to SecretKey
-        // decode the base64 encoded string
-        val decodedKey: ByteArray = Base64.getDecoder().decode(getAPIKey())
-        // rebuild key using SecretKeySpec
-        val originalKey: SecretKey = SecretKeySpec(decodedKey, 0, decodedKey.size, "AES")
-
-        // Encrypt the bytearray
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
-        cipher.init(Cipher.ENCRYPT_MODE, originalKey)
-        val cipherByteArray: ByteArray = cipher.doFinal(byteArray)*/
 
         // Generate the File
         val file = File(
             getOutputDirectory(context),
             SimpleDateFormat(
                 FILENAME_FORMAT, Locale.US
-            ).format(1) + "_dummy_text_file.txt"
+            ).format(1) + "_dummy_file.tflite"
         )
 
         // Write to FileOutputStream
@@ -189,12 +176,8 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
                 //nnApiDelegate = NnApiDelegate()
                 //tfliteOptions.addDelegate(nnApiDelegate)
 
-                tfLite = Interpreter(loadByteBufferFromTextFile(), tfliteOptions)
-                // tfLite = Interpreter(
-                //                    loadModelFile(
-                //                        context.assets
-                //                    ), tfliteOptions
-                //                )
+                tfLite = Interpreter(loadByteBufferFromEncryptedTFLiteFile(), tfliteOptions)
+                //tfLite = Interpreter(loadModelFile(context.assets), tfliteOptions)
             } catch (e: java.lang.Exception) {
                 throw RuntimeException(e)
             }
@@ -257,6 +240,31 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         byteBuffer.order(ByteOrder.nativeOrder())
         byteBuffer.rewind()
         byteBuffer.put(byteArray)
+        return byteBuffer
+    }
+
+    private fun loadByteBufferFromEncryptedTFLiteFile(
+    ): ByteBuffer {
+        val fileInputStream = context.assets.open("encrypted_file.tflite")
+        val byteArray: ByteArray = ByteStreams.toByteArray(fileInputStream)
+
+        // String to ByteArray
+        val decodedKey: ByteArray = getAPIKey().toByteArray(Charsets.UTF_8)
+        // rebuild key using SecretKeySpec
+        val originalKey: SecretKey = SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
+        // IV Key to ByteArray
+        val ivByteArray = getIVKey().toByteArray()
+        val ivSpec: AlgorithmParameterSpec = IvParameterSpec(ivByteArray)
+        // Decrypt the bytearray
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+        cipher.init(Cipher.DECRYPT_MODE, originalKey, ivSpec)
+        // Decrypted ByteArray
+        val cipherByteArray: ByteArray = cipher.doFinal(byteArray)
+
+        val byteBuffer = ByteBuffer.allocateDirect(cipherByteArray.size)
+        byteBuffer.order(ByteOrder.nativeOrder())
+        byteBuffer.rewind()
+        byteBuffer.put(cipherByteArray)
         return byteBuffer
     }
 
