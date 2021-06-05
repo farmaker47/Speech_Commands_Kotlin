@@ -82,7 +82,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     }
 
     // This function helps encrypt and save the TFLite file to output directory
-    // e.g com.george.speech_commands_kotlin/Speech Commands Kotlin/.._dummy_text_file.tflite
+    // e.g com.george.speech_commands_kotlin/Speech Commands Kotlin/.._encrypted_file.tflite
     // https://developer.android.com/reference/javax/crypto/Cipher
     // https://developer.android.com/guide/topics/security/cryptography#encrypt-message
     private fun loadTfliteToEncryptedByteArray() {
@@ -91,7 +91,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
         // String to ByteArray
         val decodedKey: ByteArray = getAPIKey().toByteArray(Charsets.UTF_8)
-        // rebuild key using SecretKeySpec
+        // Rebuild key using SecretKeySpec
         val originalKey: SecretKey = SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
         // IV Key to ByteArray
         val ivByteArray = getIVKey().toByteArray()
@@ -176,6 +176,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
                 //nnApiDelegate = NnApiDelegate()
                 //tfliteOptions.addDelegate(nnApiDelegate)
 
+                // Load encrypted or non encrypted model file
                 tfLite = Interpreter(loadByteBufferFromEncryptedTFLiteFile(), tfliteOptions)
                 //tfLite = Interpreter(loadModelFile(context.assets), tfliteOptions)
             } catch (e: java.lang.Exception) {
@@ -250,7 +251,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
         // String to ByteArray
         val decodedKey: ByteArray = getAPIKey().toByteArray(Charsets.UTF_8)
-        // rebuild key using SecretKeySpec
+        // Rebuild key using SecretKeySpec
         val originalKey: SecretKey = SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
         // IV Key to ByteArray
         val ivByteArray = getIVKey().toByteArray()
