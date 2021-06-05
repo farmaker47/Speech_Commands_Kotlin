@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
-import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.widget.CompoundButton
@@ -18,8 +17,10 @@ import androidx.lifecycle.Observer
 import com.george.speech.databinding.TfeScActivitySpeechBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.BottomSheetCallback
+import com.scottyab.rootbeer.RootBeer
 import org.koin.android.viewmodel.ext.android.viewModel
 import java.util.*
+
 
 class MainActivity : AppCompatActivity(),
     ActivityCompat.OnRequestPermissionsResultCallback,
@@ -72,6 +73,21 @@ class MainActivity : AppCompatActivity(),
         bindingActivitySpeechBinding = TfeScActivitySpeechBinding.inflate(layoutInflater)
         setContentView(bindingActivitySpeechBinding.root)
         bindingActivitySpeechBinding.lifecycleOwner = this
+
+        // Check offline for rooted device
+        // If device is rooted then show a Toast and finish activity
+        // More info at https://github.com/scottyab/rootbeer
+        // and for devices with busybox use complete root detection method
+        // rootBeer.isRootedWithBusyBoxCheck();
+        val rootBeer = RootBeer(this)
+        if (rootBeer.isRooted) {
+            //we found indication of root
+            Toast.makeText(this, "Rooted device!! Closing application", Toast.LENGTH_LONG).show()
+            finish()
+        } else {
+            //we didn't find indication of root
+            //Toast.makeText(this, "Device not rooted", Toast.LENGTH_LONG).show()
+        }
 
         //Check for permissions
         initRequestPermissions()
