@@ -77,7 +77,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         _labels.value = recognizeCommands.loadLabelsFromAssetsFolder()
 
         //loadTfliteToByteArray()
-        //loadTfliteToEncryptedByteArray()
+        //loadAndEncryptTFLiteFile()
 
     }
 
@@ -85,7 +85,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
     // e.g com.george.speech_commands_kotlin/Speech Commands Kotlin/.._encrypted_file.tflite
     // https://developer.android.com/reference/javax/crypto/Cipher
     // https://developer.android.com/guide/topics/security/cryptography#encrypt-message
-    private fun loadTfliteToEncryptedByteArray() {
+    private fun loadAndEncryptTFLiteFile() {
         val inputStream = context.assets.open(MainActivity.MODEL_FILENAME)
         val byteArray: ByteArray = ByteStreams.toByteArray(inputStream)
 
@@ -444,5 +444,3 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         tfLite.close()
     }
 }
-
-//external fun getAPIKey(): String
