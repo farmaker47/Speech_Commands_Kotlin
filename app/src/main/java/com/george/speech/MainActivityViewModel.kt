@@ -76,8 +76,8 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         loadModelFromAssetsFolder(1)
         _labels.value = recognizeCommands.loadLabelsFromAssetsFolder()
 
-        // loadTfliteToByteArray()
-        loadTfliteToEncryptedByteArray()
+        //loadTfliteToByteArray()
+        //loadTfliteToEncryptedByteArray()
 
     }
 
@@ -92,7 +92,8 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         // String to ByteArray
         val decodedKey: ByteArray = getAPIKey().toByteArray(Charsets.UTF_8)
         // Rebuild key using SecretKeySpec
-        val originalKey: SecretKey = SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
+        val originalKey: SecretKey =
+            SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
         // IV Key to ByteArray
         val ivByteArray = getIVKey().toByteArray()
         val ivSpec: AlgorithmParameterSpec = IvParameterSpec(ivByteArray)
@@ -119,7 +120,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             fos.write(cipherByteArray)
             fos.close()
         } catch (e: Exception) {
-            Log.e("Error_of_byte_array", e.message)
+            Log.e("Error_of_byte_array", e.message ?: "Error writing to output directory")
         }
 
 
@@ -146,7 +147,7 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
             fos.write(byteArray)
             fos.close()
         } catch (e: Exception) {
-            Log.e("Error_of_byte_array", e.message)
+            Log.e("Error_of_byte_array", e.message ?: "Error writing to output directory")
         }
 
 
@@ -252,7 +253,8 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         // String to ByteArray
         val decodedKey: ByteArray = getAPIKey().toByteArray(Charsets.UTF_8)
         // Rebuild key using SecretKeySpec
-        val originalKey: SecretKey = SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
+        val originalKey: SecretKey =
+            SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
         // IV Key to ByteArray
         val ivByteArray = getIVKey().toByteArray()
         val ivSpec: AlgorithmParameterSpec = IvParameterSpec(ivByteArray)
