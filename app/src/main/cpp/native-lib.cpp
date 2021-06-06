@@ -18,3 +18,11 @@ Java_com_george_speech_MainActivityKt_getIVKey(JNIEnv *env, jclass clazz) {
     std::string api_key = "FXj943G5QoRsGRHm";
     return env->NewStringUTF(api_key.c_str());
 }
+
+// SafetyNet API key
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_george_speech_MainActivityKt_getSafetyAPIKey(JNIEnv *env, jclass clazz) {
+    std::string api_key = "AIzaSyA-5sdA1G4wZtnsXKNDM1Txstl-kzxXKZE";
+    return env->NewStringUTF(api_key.c_str());
+}
