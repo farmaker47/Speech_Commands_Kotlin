@@ -13,4 +13,6 @@ The percentage displayed is average command recognition over a window duration (
 
 More information about the training procedure can be found [here](https://www.tensorflow.org/tutorials/audio/simple_audio).
 
+## Explore the code for cryptography
 
+The idea behind this repository is to encrypt a tflite file and use it inside an android studio project. This way at a production application it is very difficult for someone to extract the apk file and get a working tflite file. The cryptography is based on [Google's basic AES encryption](https://developer.android.com/guide/topics/security/cryptography#encrypt-message) with a use of a custom 32 Byte key that is stored inside a C++ file so at compile time this is converted to 1s and 0s.
