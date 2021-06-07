@@ -79,8 +79,7 @@ It requires:
 
 More info at the [github page](https://github.com/scottyab/safetynethelper).
 
-
-
-
+# Acknowledgement
+Special thanks to Claudio Brakai for his tips on the creation of the C++ file for the encryption.
 
 
