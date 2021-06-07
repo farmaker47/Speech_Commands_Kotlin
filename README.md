@@ -33,9 +33,9 @@ And that way we have a working application that uses an encrypted .tflite file!
 
 ## Check the integrity of the device
 
-Inside the application it is demonstrated how you can check the integrity of the device. There is an offline way to check if the device is rooted and two online procedures to check the overall integrity of the device.
+Inside the application it is demonstrated how you can check the integrity of the device. There is an offline way to check if the device is rooted and two online procedures to check the overall integrity of the device. You can use whatever method suits your needs and it is not mandatory to use all of them.
 
-### Check rooted device with RootBeer
+### 1. Check rooted device with RootBeer
 
 This handy library does the below root checks:
 
@@ -55,7 +55,32 @@ Native checks
 
 - checkForSuBinary
 
-You can find the usage of this library at [`MainActivity.kt`](https://github.com/farmaker47/Speech_Commands_Kotlin/blob/master/app/src/main/java/com/george/speech/MainActivity.kt#L102) on line 102. If the library finds that the device is rooted then it finishes the application. 
+You can find the usage of this library at [`MainActivity.kt`](https://github.com/farmaker47/Speech_Commands_Kotlin/blob/master/app/src/main/java/com/george/speech/MainActivity.kt#L102) on line 102. If the library finds that the device is rooted then it finishes the application.
 
-### Check the integrity with SafetyNet API
+For a root check you can use also a [custom method](http://www.codeplayon.com/2020/07/android-how-to-check-phone-rooted-or-not/) that searches for several folders inside the device's internal storage.
+
+### 2. Check the integrity with SafetyNet API
+
+The SafetyNet Attestation API is an anti-abuse API that allows app developers to assess the Android device their app is running on. The API should be used as a part of your abuse detection system to help determine whether your servers are interacting with your genuine app running on a genuine Android device. You can learn more information at [this](https://developer.android.com/training/safetynet/attestation) web page. At [`MainActivity.kt`](https://github.com/farmaker47/Speech_Commands_Kotlin/blob/master/app/src/main/java/com/george/speech/MainActivity.kt#L292) class line 292 you can see the implementation of calling this API. The result is a cryptographically-signed attestation that you have to send to your servers for further processing. Check complete workflow [here](https://developer.android.com/training/safetynet/attestation#overview). Based on the result the application closes or continues. 
+
+### 3. Check and get a final response with SafetyNet Helper library
+
+SafetyNet Helper wraps the Google Play Services SafetyNet.API and verifies Safety Net API response with the [Android Device Verification API](https://developer.android.com/google/play/safetynet/start.html#verify-compat-check). It features:
+
+- Calls Google play services Safety Net test
+- Local verification of request
+- Verifies Safety Net API response with the Android Device Verification API (over SSL pinned connection)
+
+It requires:
+
+- Google Play services (specifically the SafetyNet API 'com.google.android.gms:play-services-safetynet:17.0.0')
+- Requires Internet permission
+- Google API key for the Android Device Verification API
+
+More info at the [github page](https://github.com/scottyab/safetynethelper).
+
+
+
+
+
 
