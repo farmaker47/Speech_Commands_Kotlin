@@ -33,7 +33,7 @@ And that way we have a working application that uses an encrypted .tflite file!
 
 ## Check the integrity of the device
 
-Inside the application it is demonstrated how you can check the integrity of the device. There is an offline way to check if the device is rooted and two online procedures to check the overall integrity of the device.
+Inside the application it is demonstrated how you can check the integrity of the device. There is an offline way to check if the device is rooted and two online procedures to check the overall integrity of the device. You can use whatever method suits your needs and it is not mandatory to use all of them.
 
 ### 1. Check rooted device with RootBeer
 
@@ -55,7 +55,9 @@ Native checks
 
 - checkForSuBinary
 
-You can find the usage of this library at [`MainActivity.kt`](https://github.com/farmaker47/Speech_Commands_Kotlin/blob/master/app/src/main/java/com/george/speech/MainActivity.kt#L102) on line 102. If the library finds that the device is rooted then it finishes the application. 
+You can find the usage of this library at [`MainActivity.kt`](https://github.com/farmaker47/Speech_Commands_Kotlin/blob/master/app/src/main/java/com/george/speech/MainActivity.kt#L102) on line 102. If the library finds that the device is rooted then it finishes the application.
+
+For a root check you can use also a [custom method](http://www.codeplayon.com/2020/07/android-how-to-check-phone-rooted-or-not/) that searches for several folders inside the device's internal storage.
 
 ### 2. Check the integrity with SafetyNet API
 
