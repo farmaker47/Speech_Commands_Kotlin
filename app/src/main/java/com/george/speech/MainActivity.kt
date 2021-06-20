@@ -44,6 +44,7 @@ import com.scottyab.rootbeer.RootBeer
 import com.scottyab.safetynet.SafetyNetHelper
 import com.scottyab.safetynet.SafetyNetHelper.SafetyNetWrapperCallback
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.getViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -116,7 +117,7 @@ class MainActivity : AppCompatActivity(),
         // rootBeer.isRootedWithBusyBoxCheck();
         lifecycleScope.launch(Dispatchers.Default) {
             val rootBeer = RootBeer(this@MainActivity)
-            if (rootBeer.isRooted) {
+            if (rootBeer.isRooted && !BuildConfig.DEBUG) {
                 //we found indication of root
                     runOnUiThread {
                         Toast.makeText(this@MainActivity, "Rooted device!! Closing application", Toast.LENGTH_LONG).show()
@@ -441,8 +442,12 @@ class MainActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
-        viewModel.startRecording()
-        viewModel.startRecognition()
+        lifecycleScope.launch {
+            delay(2000)
+            viewModel.startRecording()
+            viewModel.startRecognition()
+        }
+
     }
 
     override fun onPause() {
