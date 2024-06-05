@@ -23,6 +23,6 @@ Java_com_george_speech_MainActivityKt_getIVKey(JNIEnv *env, jclass clazz) {
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_george_speech_MainActivityKt_getSafetyAPIKey(JNIEnv *env, jclass clazz) {
-    std::string api_key = "AIzaSyA-5sdA1G4wZtnsXKNDM1Txstl-kzxXKZE";
+    std::string api_key = "AIzaSyA-5sdA1G4wZtnsXKNDM1Txstl";
     return env->NewStringUTF(api_key.c_str());
 }
