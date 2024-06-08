@@ -42,11 +42,13 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.channels.FileChannel
+import java.security.SecureRandom
 import java.security.spec.AlgorithmParameterSpec
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -92,8 +94,27 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
 
         //loadTfliteToByteArray()
         //loadAndEncryptTFLiteFile()
+        //val (secretKey, iv) = generateAESKeyAndIV()
+        //println("AES Key (Base64): ${Base64.getEncoder().encodeToString(secretKey.encoded)}")
+        //println("IV Key (Base64): ${Base64.getEncoder().encodeToString(iv)}")
 
     }
+
+    private fun generateAESKeyAndIV(): Pair<SecretKey, ByteArray> {
+        // Generate a 32-byte AES key
+        val keyGen = KeyGenerator.getInstance("AES")
+        keyGen.init(256) // for AES-256
+        val secretKey = keyGen.generateKey()
+
+        // Generate a 16-byte IV key
+        val iv = ByteArray(16)
+        val secureRandom = SecureRandom()
+        secureRandom.nextBytes(iv)
+
+        return Pair(secretKey, iv)
+    }
+
+    private fun String.fromBase64(): ByteArray = Base64.getDecoder().decode(this)
 
     // This function helps encrypt and save the TFLite file to output directory
     // e.g com.george.speech_commands_kotlin/Speech Commands Kotlin/.._encrypted_file.tflite
@@ -103,13 +124,12 @@ class MainActivityViewModel(application: Application) : AndroidViewModel(applica
         val inputStream = context.assets.open(MainActivity.MODEL_FILENAME)
         val byteArray: ByteArray = ByteStreams.toByteArray(inputStream)
 
-        // String to ByteArray
-        val decodedKey: ByteArray = getAPIKey().toByteArray(Charsets.UTF_8)
+        val decodedKey = getAPIKey().fromBase64()
+        val ivByteArray = getIVKey().fromBase64()
+
         // Rebuild key using SecretKeySpec
         val originalKey: SecretKey =
             SecretKeySpec(decodedKey, "AES")//(decodedKey, 0, decodedKey.size, "AES")
-        // IV Key to ByteArray
-        val ivByteArray = getIVKey().toByteArray()
         val ivSpec: AlgorithmParameterSpec = IvParameterSpec(ivByteArray)
         // Encrypt the bytearray
         val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
