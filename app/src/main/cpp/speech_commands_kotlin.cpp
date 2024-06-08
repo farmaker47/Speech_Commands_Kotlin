@@ -1,23 +1,7 @@
 #include <jni.h>
 #include <string>
 
-// Write C++ code here.
-//
-// Do not forget to dynamically load the C++ library into your application.
-//
-// For instance,
-//
-// In MainActivity.java:
-//    static {
-//       System.loadLibrary("speech_commands_kotlin");
-//    }
-//
-// Or, in MainActivity.kt:
-//    companion object {
-//      init {
-//         System.loadLibrary("speech_commands_kotlin")
-//      }
-//    }
+
 extern "C"
 JNIEXPORT jstring JNICALL
 Java_com_george_speech_MainActivityKt_getAPIKey(JNIEnv *env, jclass clazz) {
