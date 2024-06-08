@@ -76,11 +76,11 @@ class MainActivity : AppCompatActivity(),
 
         // for logs
         val LOG_TAG: String? = MainActivity::class.simpleName
-    }
 
-    // Load native library
-    init {
-        System.loadLibrary("native-lib")
+        // Load native library
+        init {
+            System.loadLibrary("speech_commands_kotlin")
+        }
     }
 
     // Working variables.
